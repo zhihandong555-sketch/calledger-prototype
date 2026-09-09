@@ -1,0 +1,1150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>热量账本 CalLedger · 原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+/* ============ 设计令牌：严格沿用 8631 磨砂复刻版 ============ */
+:root{
+  --bg-outer:#4a4a48;
+  --bg-app:#e9e9e6;
+  --ink:#20231f;
+  --ink-soft:#565a55;
+  --mute:#8d908a;
+  --black:#191b18;
+  --card:#fcfcfb;
+  --panel:#f1f1ee;
+  --circle:#dededa;
+  --green:#6cc57d;
+  --green-deep:#2e7d4a;
+  --lime:#d8e455;
+  --lime-deep:#6b7323;
+  --coral:#e2685a;
+  --coral-deep:#b3452f;
+  --red:#e8503f;
+  --r-app:34px; --r-lg:24px; --r-md:18px; --r-sm:14px;
+  --shadow-card:0 10px 28px rgba(25,27,24,.07),0 2px 6px rgba(25,27,24,.05);
+  --shadow-float:0 20px 44px rgba(25,27,24,.16),0 4px 10px rgba(25,27,24,.07);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Manrope","PingFang SC","Hiragino Sans GB",sans-serif;
+  background:var(--bg-outer);
+  color:var(--ink);
+  padding:38px clamp(16px,4vw,64px);
+  display:flex;justify-content:center;
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:-.01em;
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums lining-nums}
+i.ph,i.ph-bold,i.ph-fill{line-height:1}
+
+/* ============ 应用壳 ============ */
+.app{
+  flex:0 1 1440px;min-width:0;
+  background:var(--bg-app);
+  border-radius:var(--r-app);
+  padding:20px 26px 0;
+  overflow:hidden;
+  box-shadow:0 40px 90px rgba(0,0,0,.35);
+}
+
+/* ============ 顶栏 ============ */
+.topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;margin-bottom:22px}
+.tb-left{display:flex;align-items:center;gap:26px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:19px;letter-spacing:-.02em;color:var(--black)}
+.brand i{font-size:22px}
+.tb-right{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.icon-btn{
+  width:42px;height:42px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--circle);font-size:17px;color:var(--ink);
+  transition:transform .18s var(--ease),background .18s,color .18s;
+}
+.icon-btn:hover{background:#d4d4d0}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn.white{background:var(--card);box-shadow:var(--shadow-card)}
+.icon-btn.white:hover{background:#fff}
+.icon-btn.sm{width:36px;height:36px;font-size:15px}
+.modules{display:flex;align-items:center;gap:9px;justify-content:center}
+.mod{
+  width:42px;height:42px;border-radius:50%;flex:none;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--circle);font-size:17px;color:var(--ink);
+  transition:transform .18s var(--ease),background .18s,color .18s;
+}
+.mod:hover{background:#d0d0cc;transform:translateY(-1px)}
+.mod:active{transform:scale(.94)}
+.mod.active{background:var(--black);color:#fff}
+.bell{position:relative}
+.bell .dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px var(--circle);transition:opacity .2s}
+.bell:not(.unread) .dot{opacity:0}
+.avatar{
+  width:42px;height:42px;border-radius:50%;flex:none;
+  background:#cfcdc9;color:var(--ink);font-size:15px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 2px rgba(255,255,255,.7);
+}
+
+/* ============ 视图与主栅格 ============ */
+.view{display:none}
+.view.active{display:grid;grid-template-columns:minmax(0,1fr) 408px;gap:26px;animation:paneIn .38s var(--ease)}
+@keyframes paneIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.col-left{min-width:0;margin-bottom:24px}
+
+/* ---- 账户头 ---- */
+.acct-top{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.logo-card{
+  background:var(--card);border-radius:20px;box-shadow:var(--shadow-card);
+  width:128px;height:64px;flex:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+}
+.logo-card .zh{font-family:"Songti SC","STSong",serif;font-weight:700;font-size:19px;letter-spacing:.14em;text-indent:.14em;color:#17181a}
+.logo-card .en{font-size:7.5px;font-weight:700;letter-spacing:.34em;text-indent:.34em;color:#5c5f5c}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{
+  height:38px;padding:0 20px;border-radius:999px;
+  background:var(--card);box-shadow:var(--shadow-card);
+  font-size:13px;font-weight:700;color:var(--ink);
+  transition:transform .18s var(--ease),background .2s,color .2s;
+}
+.tab:hover{background:#fff}
+.tab:active{transform:scale(.96)}
+.tab.active{background:var(--black);color:#fff}
+.acct-top > .icon-btn{margin-left:auto}
+
+/* ---- 今日概要 ---- */
+.pane{display:grid;grid-template-columns:196px minmax(0,1fr);gap:30px;margin-bottom:26px}
+.acct-name{font-size:25px;line-height:1.18;font-weight:800;letter-spacing:-.02em;color:var(--black)}
+.acct-name .date{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-top:6px;letter-spacing:0}
+.big-bal{margin-top:14px}
+.big-bal .val{font-size:38px;font-weight:800;letter-spacing:-.02em;color:var(--green-deep);line-height:1.1}
+.big-bal .val.neg{color:var(--coral-deep)}
+.big-bal .cap{font-size:12px;font-weight:700;color:var(--mute);margin-top:5px}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 24px;align-content:start}
+.f-label{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--mute)}
+.f-label i{font-size:14px}
+.f-value{margin-top:5px;padding-left:21px;font-size:15px;font-weight:800;letter-spacing:-.01em}
+.f-value.pos{color:var(--green-deep)}
+.f-value.neg{color:var(--coral-deep)}
+.f-note{margin-top:3px;padding-left:21px;font-size:11px;font-weight:600;color:var(--mute)}
+.meter-cell{grid-column:2 / 4;align-self:end}
+.meter{height:8px;background:rgba(25,27,24,.08);border-radius:999px;overflow:hidden;margin-top:10px}
+.meter i{display:block;height:100%;width:76%;border-radius:999px;background:var(--green-deep);transition:width .45s var(--ease),background .3s}
+.meter-note{font-size:11.5px;font-weight:600;color:var(--mute);margin-top:8px}
+
+/* ---- 记一笔 ---- */
+.entry{
+  display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+  padding:18px 20px;margin-bottom:26px;
+  background:var(--panel);border-radius:var(--r-lg);
+  transition:outline .1s;
+}
+.entry-head{display:flex;align-items:center;gap:8px;margin-right:6px;align-self:center}
+.entry-head .lead-icon{width:36px;height:36px;border-radius:50%;background:var(--black);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:15px}
+.entry-head b{font-size:15px;font-weight:800}
+.entry-warn{font-size:11px;font-weight:700;color:var(--coral-deep);align-self:center}
+.field{flex:1;min-width:150px}
+.field label{display:block;font-size:11.5px;font-weight:600;color:var(--mute);margin-bottom:7px}
+.field .box{
+  background:var(--card);border-radius:var(--r-sm);box-shadow:var(--shadow-card);
+  padding:9px 14px;display:flex;align-items:baseline;gap:7px;justify-content:space-between;
+  border:1.5px solid transparent;transition:border-color .2s;
+}
+.field .box:focus-within{border-color:var(--black)}
+.field input,.field select{
+  width:100%;min-width:0;border:0;outline:0;background:none;
+  font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em;
+}
+.field select{font-size:14px;cursor:pointer}
+.field .unit{font-size:11px;font-weight:700;color:var(--mute)}
+.btn-primary{
+  background:var(--black);color:#fff;border-radius:999px;
+  height:42px;padding:0 20px;
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  font-size:13px;font-weight:700;
+  transition:transform .18s var(--ease),background .2s,color .2s;
+}
+.btn-primary i{font-size:14px}
+.btn-primary:hover{background:#2a2d29}
+.btn-primary:active{transform:scale(.96)}
+.btn-primary.arm{background:var(--coral)}
+.btn-primary .kbd{
+  font-size:10px;font-weight:600;line-height:1;padding:3px 6px;border-radius:6px;
+  border:1px solid rgba(255,255,255,.35);
+}
+.mini-btn{
+  height:32px;padding:0 13px;border-radius:999px;background:var(--black);color:#fff;
+  font-size:11.5px;font-weight:700;transition:transform .18s var(--ease);
+  display:inline-flex;align-items:center;gap:5px;
+}
+.mini-btn.ghost{background:var(--circle);color:var(--ink)}
+.mini-btn:active{transform:scale(.94)}
+
+/* ---- 黑头条分区 ---- */
+.sg-header{
+  background:var(--black);color:#fff;
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
+  padding:14px 18px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 14px 30px rgba(25,27,24,.28);
+  position:relative;z-index:1;
+}
+.sg-header h2{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.sg-header .sub{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.72)}
+.sg-header .spacer{margin-left:auto}
+.head-dot{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.12);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:transform .18s var(--ease),background .2s;
+}
+.head-dot i{font-size:14px}
+.head-dot:hover{background:rgba(255,255,255,.22)}
+.head-dot:active{transform:scale(.92)}
+.sg-panel{background:var(--panel);border-radius:0 0 var(--r-lg) var(--r-lg);padding:16px 18px 18px;margin-bottom:26px}
+
+/* ---- 近 7 天日卡 ---- */
+.day-strip{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+.day-strip::-webkit-scrollbar{display:none}
+.day-card{
+  flex:0 0 196px;min-width:0;border-radius:20px;padding:14px 14px 12px;
+  color:#1b221b;box-shadow:0 8px 22px rgba(25,27,24,.10);
+  transition:transform .22s var(--ease),box-shadow .22s;
+}
+.day-card:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(25,27,24,.16)}
+.day-card.sage{background:var(--green)}
+.day-card.sand{background:var(--lime)}
+.day-card.brick{background:var(--coral)}
+.day-top{display:flex;align-items:center;gap:10px}
+.day-ava{
+  width:42px;height:42px;border-radius:50%;background:#fff;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;flex:none;
+  font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;
+  box-shadow:0 0 0 2px rgba(255,255,255,.55);
+}
+.day-name{font-size:13.5px;font-weight:800;line-height:1.3}
+.day-name small{display:block;font-weight:600;font-size:11px;opacity:.66}
+.day-rows{margin-top:12px;display:grid;gap:7px}
+.day-row{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}
+.day-row .lk{font-weight:700;opacity:.6}
+.day-row .lv{font-weight:800;font-variant-numeric:tabular-nums}
+
+/* ---- 账本流水表 ---- */
+.call-table{display:flex;flex-direction:column;font-variant-numeric:tabular-nums}
+.call-headrow,.ledger-row{
+  display:grid;grid-template-columns:1.2fr .85fr .85fr 1fr .95fr;
+  align-items:center;gap:8px;
+}
+.call-headrow{font-size:11.5px;font-weight:600;color:var(--mute);padding:2px 2px 10px}
+.ledger-row{padding:11px 6px;border-radius:12px;transition:background .18s;cursor:pointer}
+.ledger-row + .ledger-row{border-top:1px solid rgba(25,27,24,.06)}
+.ledger-row:hover{background:rgba(25,27,24,.035)}
+.c-date{font-size:13px;font-weight:800;color:var(--black)}
+.c-date small{font-weight:600;font-size:11px;color:var(--mute);margin-left:6px}
+.c-date i{font-size:12px;color:var(--mute);margin-left:6px;vertical-align:-1px}
+.c-num{font-size:12.5px;font-weight:600;color:var(--ink-soft);text-align:right}
+.c-num.bal{font-weight:800;font-size:13px}
+.c-num.pos{color:var(--green-deep)}
+.c-num.neg{color:var(--coral-deep)}
+.c-num.dim{color:var(--mute)}
+.c-state{text-align:right}
+.status-pill{display:inline-block;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700}
+.status-pill.today{background:var(--black);color:#fff}
+.status-pill.ok{background:#dbdbd7;color:var(--ink)}
+.status-pill.miss{background:var(--lime);color:#4d5417}
+.row-edit{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s var(--ease)}
+.ledger-item.open .row-edit{grid-template-rows:1fr}
+.row-edit>div{overflow:hidden}
+.row-edit-inner{
+  display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;
+  margin:4px 2px 14px;padding:14px 16px;
+  background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow-card);
+}
+.row-edit-inner .field{min-width:120px;flex:1}
+.row-edit-inner .field.note{min-width:180px;flex:1.4}
+.row-edit-inner .field input{font-size:14px}
+.row-edit-warn{font-size:11px;font-weight:700;color:var(--coral-deep);align-self:center}
+
+/* ============ 右栏 ============ */
+.col-right{display:flex;flex-direction:column;min-width:0}
+.dash-header{
+  background:var(--black);color:#fff;
+  border-radius:var(--r-lg);padding:17px 20px;
+  box-shadow:0 14px 30px rgba(25,27,24,.28);
+  position:relative;z-index:1;
+  display:flex;align-items:center;gap:12px;
+}
+.dash-header h2{font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+.dash-header .spacer{margin-left:auto}
+
+.metrics{
+  margin-top:12px;position:relative;z-index:2;
+  background:var(--card);border-radius:var(--r-lg);
+  padding:16px 18px 12px;box-shadow:var(--shadow-float);
+}
+.metrics-body{display:grid;grid-template-columns:minmax(0,1fr) 178px;gap:6px;align-items:center}
+.stats{display:flex;flex-direction:column;gap:14px;padding-left:4px}
+.stat .s-label{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--mute)}
+.stat .s-label i{width:8px;height:8px;border-radius:50%;flex:none}
+.stat .s-value{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat .s-value.pos{color:var(--green-deep)}
+.stat .s-value.neg{color:var(--coral-deep)}
+.flower{width:178px;height:178px;justify-self:end}
+.flower svg{width:100%;height:100%;overflow:visible}
+.flower .mid{font:600 10px Manrope,"PingFang SC",sans-serif;fill:var(--mute);text-anchor:middle}
+.flower .big{font:800 24px Manrope,"PingFang SC",sans-serif;fill:var(--black);text-anchor:middle;letter-spacing:-.02em}
+.flower .lbl{font:700 11px Manrope,"PingFang SC",sans-serif;fill:var(--mute);text-anchor:middle}
+.flower .petal{transition:opacity .2s}
+.flower .petal:hover{opacity:.82}
+
+.dash-panel{margin-top:14px;background:var(--panel);border-radius:var(--r-lg);padding:16px 16px 14px}
+.panel-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:0 2px}
+.panel-head h3{font-size:15px;font-weight:800}
+.panel-head .spacer{margin-left:auto}
+.glyph-btn{
+  width:32px;height:32px;border-radius:50%;color:var(--ink);
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .18s,transform .18s var(--ease);
+}
+.glyph-btn i{font-size:15px}
+.glyph-btn:hover{background:rgba(25,27,24,.07)}
+.glyph-btn:active{transform:scale(.92)}
+.lead-icon{width:36px;height:36px;border-radius:50%;background:var(--black);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:15px}
+.arch-row{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid rgba(25,27,24,.06)}
+.arch-row:first-of-type{border-top:0;padding-top:2px}
+.arch-row .lk{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.arch-row .ld{font-size:11px;font-weight:600;color:var(--mute);margin-left:auto}
+.arch-row .num{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.arch-row .num.pos{color:var(--green-deep)}
+.arch-row .num.kg{color:var(--ink-soft);font-weight:700;font-size:11.5px;min-width:74px;text-align:right}
+
+/* ---- 说明卡 ---- */
+.note-card{
+  margin-top:14px;background:var(--card);border-radius:var(--r-lg);
+  padding:16px 18px;box-shadow:var(--shadow-card);
+  display:flex;gap:12px;align-items:flex-start;
+}
+.note-card .lead-icon{margin-top:2px}
+.note-card h4{font-size:13.5px;font-weight:800;margin-bottom:4px}
+.note-card p{font-size:12px;font-weight:500;color:var(--ink-soft);line-height:1.55;max-width:44ch}
+
+/* ---- BMR 卡 ---- */
+.bmr-card{
+  margin-top:14px;background:var(--card);border-radius:var(--r-lg);
+  padding:16px 18px;box-shadow:var(--shadow-card);
+}
+.bmr-card h3{font-size:15px;font-weight:800;margin-bottom:10px}
+.bmr-row{display:flex;align-items:center;gap:12px}
+.bmr-row .val{font-size:24px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bmr-row .sub{font-size:11px;font-weight:600;color:var(--mute);margin-top:2px}
+.bmr-row .btn-primary{margin-left:auto;height:36px;padding:0 16px;font-size:12px}
+
+/* ---- 底部贴边裁切卡 ---- */
+.bottom-dock{margin-top:auto;height:148px;overflow:hidden;border-radius:24px 24px 0 0}
+.bottom-card{background:var(--card);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow-float);position:relative;z-index:2}
+.bottom-card h3{font-size:15.5px;font-weight:800}
+.bottom-card .sub{font-size:11px;font-weight:600;color:var(--mute);margin-top:2px}
+.bottom-card .hero{font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--green-deep);margin-top:10px;font-variant-numeric:tabular-nums}
+.bottom-card .hero small{font-size:13px;font-weight:700;color:var(--ink-soft);margin-left:4px}
+
+/* ---- 设置页表单 ---- */
+.form-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.form-hint{font-size:11px;font-weight:600;color:var(--mute);margin-top:12px;line-height:1.5}
+.divider{height:1px;background:rgba(25,27,24,.07);margin:16px -18px}
+.helper-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.helper-head b{font-size:13.5px;font-weight:800}
+.helper-head .sug{margin-left:auto;font-size:12px;font-weight:600;color:var(--mute)}
+.helper-head .sug b{font-size:16px;font-weight:800;color:var(--black);margin-left:4px;font-variant-numeric:tabular-nums}
+.helper-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.history-row{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid rgba(25,27,24,.06)}
+.history-row:first-of-type{border-top:0;padding-top:2px}
+.history-row .lk{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.history-row .ld{font-size:11px;font-weight:600;color:var(--mute);margin-left:auto;font-variant-numeric:tabular-nums}
+.history-row .num{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* ============ 焦点与动效 ============ */
+:where(button,input,select):focus-visible{outline:2px solid var(--black);outline-offset:2px;border-radius:999px}
+.field input:focus-visible,.field select:focus-visible{outline:none}
+.field .box:focus-within{border-color:var(--black)}
+@media (prefers-reduced-motion:no-preference){
+  .app{animation:rise .6s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .day-card,.metrics,.bmr-card,.note-card,.bottom-card,.logo-card,.tab,.fields>*,.entry{animation:fadeUp .5s var(--ease) both}
+  .day-strip .day-card:nth-child(2){animation-delay:.05s}
+  .day-strip .day-card:nth-child(3){animation-delay:.1s}
+  .day-strip .day-card:nth-child(4){animation-delay:.15s}
+  .day-strip .day-card:nth-child(n+5){animation-delay:.2s}
+  .metrics{animation-delay:.12s}.bmr-card{animation-delay:.16s}.bottom-card{animation-delay:.2s}
+  .flower{animation:bloom .7s var(--ease) .15s both}
+  @keyframes bloom{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:none}}
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+
+/* ============ 响应式 ============ */
+@media (max-width:1280px){
+  .view.active{grid-template-columns:minmax(0,1fr) 372px}
+  .flower{width:160px;height:160px}
+}
+@media (max-width:1120px){
+  .view.active{grid-template-columns:1fr}
+  .col-right{max-width:600px}
+  .bottom-dock{height:auto;overflow:visible;border-radius:var(--r-lg)}
+}
+@media (max-width:900px){
+  .topbar{grid-template-columns:auto 1fr auto}
+  .modules{justify-content:flex-end;overflow-x:auto;scrollbar-width:none}
+  .modules::-webkit-scrollbar{display:none}
+  .pane{grid-template-columns:1fr}
+  .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .meter-cell{grid-column:1 / -1}
+  .metrics-body{grid-template-columns:1fr;justify-items:start}
+  .flower{justify-self:center}
+  .helper-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  body{padding:16px 10px}
+  .app{padding:14px 14px 0}
+  .call-headrow,.ledger-row{grid-template-columns:1.2fr .8fr .8fr 1fr}
+  .c-state{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= 顶栏 ================= -->
+  <header class="topbar">
+    <div class="tb-left">
+      <span class="brand"><i class="ph-fill ph-wallet"></i>热量账本</span>
+      <button class="icon-btn" id="backBtn" title="返回" aria-label="返回"><i class="ph ph-arrow-left"></i></button>
+    </div>
+
+    <nav class="modules" aria-label="模块">
+      <button class="mod active" data-goto="today" title="今日" aria-current="page"><i class="ph ph-house"></i></button>
+      <button class="mod" data-goto="ledger" title="账本"><i class="ph ph-book-open"></i></button>
+      <button class="mod" id="modEntry" title="记一笔"><i class="ph ph-plus"></i></button>
+      <button class="mod" title="统计（V2 规划）"><i class="ph ph-chart-pie"></i></button>
+      <button class="mod" id="modWeek" title="周账归档"><i class="ph ph-calendar-blank"></i></button>
+      <button class="mod" data-goto="settings" title="设置"><i class="ph ph-gear"></i></button>
+    </nav>
+
+    <div class="tb-right">
+      <button class="icon-btn" title="搜索" aria-label="搜索"><i class="ph ph-magnifying-glass"></i></button>
+      <button class="icon-btn bell unread" id="bell" title="09-05 缺卡，可补记" aria-label="提醒"><i class="ph ph-bell"></i><span class="dot"></span></button>
+      <span class="avatar" title="V">V</span>
+    </div>
+  </header>
+
+  <main>
+  <!-- ================================================== 今日页 -->
+  <section class="view active" data-view="today">
+    <section class="col-left">
+      <div class="acct-top">
+        <div class="logo-card"><div class="zh">热量账本</div><div class="en">CALLEDGER</div></div>
+        <div class="tabs" role="tablist" aria-label="视图">
+          <button class="tab active" data-goto="today" role="tab" aria-selected="true">今日</button>
+          <button class="tab" data-goto="ledger" role="tab" aria-selected="false">账本</button>
+          <button class="tab" data-goto="settings" role="tab" aria-selected="false">设置</button>
+        </div>
+        <button class="icon-btn white" id="editBtn" title="记一笔" aria-label="记一笔"><i class="ph ph-pencil-simple"></i></button>
+      </div>
+
+      <div class="pane">
+        <div>
+          <h1 class="acct-name">今日<span class="date">2026-09-09 周三</span></h1>
+          <div class="big-bal">
+            <div class="val num" id="bigBal">+400</div>
+            <div class="cap">今日余额 · kcal</div>
+          </div>
+        </div>
+        <div class="fields">
+          <div class="field">
+            <div class="f-label"><i class="ph ph-download-simple"></i>到账</div>
+            <div class="f-value num" id="fIn">+1,650</div>
+            <div class="f-note">基础代谢额度</div>
+          </div>
+          <div class="field">
+            <div class="f-label"><i class="ph ph-upload-simple"></i>消费</div>
+            <div class="f-value neg num" id="fOut">-1,850</div>
+            <div class="f-note">今日饮食摄入</div>
+          </div>
+          <div class="field">
+            <div class="f-label"><i class="ph ph-trend-up"></i>攒回</div>
+            <div class="f-value pos num" id="fEarn">+600</div>
+            <div class="f-note">慢跑 40 分钟</div>
+          </div>
+          <div class="field">
+            <div class="f-label"><i class="ph ph-book-open"></i>基础代谢</div>
+            <div class="f-value num" id="fBmr">1,650</div>
+            <div class="f-note" id="fBmrNote">kcal / 天，09-06 起生效</div>
+          </div>
+          <div class="meter-cell">
+            <div class="meter"><i id="meterFill"></i></div>
+            <p class="meter-note" id="meterNote">已用 76%，剩余 400 kcal</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="entry" id="entry">
+        <div class="entry-head">
+          <span class="lead-icon"><i class="ph ph-plus"></i></span>
+          <b>记一笔</b>
+        </div>
+        <div class="field">
+          <label for="ateInput">吃了</label>
+          <div class="box"><input id="ateInput" inputmode="numeric" value="1,850" aria-label="吃了多少 kcal"><span class="unit">kcal</span></div>
+        </div>
+        <div class="field">
+          <label for="moveInput">动了</label>
+          <div class="box"><input id="moveInput" inputmode="numeric" value="600" aria-label="动了多少 kcal"><span class="unit">kcal</span></div>
+        </div>
+        <span class="entry-warn" id="entryWarn" hidden>超过 10,000 kcal，再点一次确认</span>
+        <button class="btn-primary" id="saveBtn">
+          <i class="ph ph-plus"></i>保存<span class="kbd">↵</span>
+        </button>
+      </div>
+
+      <div class="sg-header">
+        <h2>近 7 天</h2>
+        <span class="sub">滚动盈余 <span class="num" id="weekSurplus">+1,300</span></span>
+        <span class="spacer"></span>
+        <span class="sub">绿=盈余 红=超支 黄=缺卡</span>
+        <button class="head-dot" data-goto="ledger" title="完整账本" aria-label="完整账本"><i class="ph ph-arrow-up-right"></i></button>
+      </div>
+      <div class="sg-panel">
+        <div class="day-strip" id="dayStrip">
+          <article class="day-card sage" data-day="09-03">
+            <div class="day-top"><span class="day-ava">03</span><div class="day-name">09/03<small>周四</small></div></div>
+            <div class="day-rows">
+              <div class="day-row"><span class="lk">吃了</span><span class="lv">1,500</span></div>
+              <div class="day-row"><span class="lk">动了</span><span class="lv">300</span></div>
+              <div class="day-row"><span class="lk">余额</span><span class="lv">+500</span></div>
+            </div>
+          </article>
+          <article class="day-card sage" data-day="09-04">
+            <div class="day-top"><span class="day-ava">04</span><div class="day-name">09/04<small>周五</small></div></div>
+            <div class="day-rows">
+              <div class="day-row"><span class="lk">吃了</span><span class="lv">1,400</span></div>
+              <div class="day-row"><span class="lk">动了</span><span class="lv">550</span></div>
+              <div class="day-row"><span class="lk">余额</span><span class="lv">+850</span></div>
+            </div>
+          </article>
+          <article class="day-card sand" data-day="09-05">
+            <div class="day-top"><span class="day-ava">05</span><div class="day-name">09/05<small>周六</small></div></div>
+            <div class="day-rows">
+              <div class="day-row"><span class="lk">状态</span><span class="lv">缺卡</span></div>
+              <div class="day-row"><span class="lk">结算</span><span class="lv">不计入</span></div>
+              <div class="day-row"><span class="lk">补记</span><span class="lv">可补</span></div>
+            </div>
+          </article>
+          <article class="day-card brick" data-day="09-06">
+            <div class="day-top"><span class="day-ava">06</span><div class="day-name">09/06<small>周日</small></div></div>
+            <div class="day-rows">
+              <div class="day-row"><span class="lk">吃了</span><span class="lv">2,300</span></div>
+              <div class="day-row"><span class="lk">动了</span><span class="lv">150</span></div>
+              <div class="day-row"><span class="lk">余额</span><span class="lv">-500</span></div>
+            </div>
+          </article>
+          <article class="day-card sage" data-day="09-07">
+            <div class="day-top"><span class="day-ava">07</span><div class="day-name">09/07<small>周一</small></div></div>
+            <div class="day-rows">
+              <div class="day-row"><span class="lk">吃了</span><span class="lv">1,600</span></div>
+              <div class="day-row"><span class="lk">动了</span><span class="lv">450</span></div>
+              <div class="day-row"><span class="lk">余额</span><span class="lv">+500</span></div>
+            </div>
+          </article>
+          <article class="day-card brick" data-day="09-08">
+            <div class="day-top"><span class="day-ava">08</span><div class="day-name">09/08<small>周二</small></div></div>
+            <div class="day-rows">
+              <div class="day-row"><span class="lk">吃了</span><span class="lv">2,100</span></div>
+              <div class="day-row"><span class="lk">动了</span><span class="lv">0</span></div>
+              <div class="day-row"><span class="lk">余额</span><span class="lv">-450</span></div>
+            </div>
+          </article>
+          <article class="day-card sage" data-day="09-09" id="todayCard">
+            <div class="day-top"><span class="day-ava">09</span><div class="day-name">09/09<small>周三 · 今天</small></div></div>
+            <div class="day-rows">
+              <div class="day-row"><span class="lk">吃了</span><span class="lv" id="tdAte">1,850</span></div>
+              <div class="day-row"><span class="lk">动了</span><span class="lv" id="tdMove">600</span></div>
+              <div class="day-row"><span class="lk">余额</span><span class="lv" id="tdBal">+400</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <aside class="col-right">
+      <div class="dash-header">
+        <h2>滚动 7 天小结</h2>
+        <span class="spacer"></span>
+        <button class="head-dot" id="goBill" title="查看周账单" aria-label="查看周账单"><i class="ph ph-arrow-up-right"></i></button>
+      </div>
+
+      <div class="metrics">
+        <div class="metrics-body">
+          <div class="stats">
+            <div class="stat">
+              <div class="s-label"><i style="background:var(--green-deep)"></i>滚动盈余</div>
+              <div class="s-value pos num" id="stSurplus">+1,300</div>
+            </div>
+            <div class="stat">
+              <div class="s-label"><i style="background:var(--ink-soft)"></i>记录覆盖</div>
+              <div class="s-value num" id="stCoverage">6/7 天</div>
+            </div>
+            <div class="stat">
+              <div class="s-label"><i style="background:var(--lime-deep)"></i>缺卡天数</div>
+              <div class="s-value num" id="stMiss">1 天</div>
+            </div>
+          </div>
+          <div class="flower">
+            <svg viewBox="0 0 230 230" role="img" aria-label="近 7 天：5 天盈余、1 天超支、1 天缺卡，已记录 6/7">
+              <g class="petals">
+                <g class="petal" transform="rotate(0 115 118)"><ellipse cx="115" cy="70" rx="29" ry="46" fill="#6cc57d"><title>09/03 盈余 +500</title></ellipse></g>
+                <g class="petal" transform="rotate(51.4 115 118)"><ellipse cx="115" cy="71" rx="30" ry="47" fill="#5cb974"><title>09/04 盈余 +850</title></ellipse></g>
+                <g class="petal" transform="rotate(102.8 115 118)"><ellipse cx="115" cy="70" rx="28" ry="44" fill="#d8e455"><title>09/05 缺卡</title></ellipse></g>
+                <g class="petal" transform="rotate(154.2 115 118)"><ellipse cx="115" cy="72" rx="30" ry="47" fill="#e2685a"><title>09/06 超支 -500</title></ellipse></g>
+                <g class="petal" transform="rotate(205.6 115 118)"><ellipse cx="115" cy="70" rx="29" ry="45" fill="#4aa96b"><title>09/07 盈余 +500</title></ellipse></g>
+                <g class="petal" transform="rotate(257 115 118)"><ellipse cx="115" cy="71" rx="30" ry="46" fill="#e2685a"><title>09/08 超支 -450</title></ellipse></g>
+                <g class="petal" id="petalToday" transform="rotate(308.4 115 118)"><ellipse cx="115" cy="70" rx="29" ry="46" fill="#6cc57d"><title>09/09 今天</title></ellipse></g>
+              </g>
+              <circle cx="115" cy="118" r="36" fill="#ffffff"/>
+              <text class="big" x="115" y="122" id="flowerCoverage">6/7</text>
+              <text class="mid" x="115" y="136">已记录</text>
+              <text class="lbl" x="150" y="22">盈余</text>
+              <text class="lbl" x="212" y="124">超支</text>
+              <text class="lbl" x="106" y="224">缺卡</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bmr-card">
+        <h3>基础代谢</h3>
+        <div class="bmr-row">
+          <div style="min-width:0">
+            <div class="val num" id="bmrCardVal">1,650</div>
+            <div class="sub" id="bmrCardSub">kcal / 天，09-06 起生效</div>
+          </div>
+          <button class="btn-primary" data-goto="settings"><i class="ph ph-pencil-simple"></i>调整</button>
+        </div>
+      </div>
+
+      <div class="bottom-dock">
+        <div class="bottom-card">
+          <h3>预估体重变化</h3>
+          <div class="sub">按滚动 7 天盈余折算 · 粗略估算</div>
+          <div class="hero num" id="estKg">~瘦 0.17 kg</div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ================================================== 账本页 -->
+  <section class="view" data-view="ledger">
+    <section class="col-left">
+      <div class="acct-top">
+        <div class="logo-card"><div class="zh">热量账本</div><div class="en">CALLEDGER</div></div>
+        <div class="tabs" role="tablist" aria-label="视图">
+          <button class="tab" data-goto="today" role="tab" aria-selected="false">今日</button>
+          <button class="tab active" data-goto="ledger" role="tab" aria-selected="true">账本</button>
+          <button class="tab" data-goto="settings" role="tab" aria-selected="false">设置</button>
+        </div>
+        <button class="icon-btn white" id="ledgerAdd" title="去记一笔" aria-label="去记一笔"><i class="ph ph-plus"></i></button>
+      </div>
+
+      <div class="pane">
+        <div>
+          <h1 class="acct-name">账本<span class="date">2026-09-01 ~ 09-09</span></h1>
+          <div class="big-bal">
+            <div class="val num pos" id="ledgerRoll">+1,300</div>
+            <div class="cap">滚动 7 天盈余 · kcal</div>
+          </div>
+        </div>
+        <div class="fields">
+          <div class="field">
+            <div class="f-label"><i class="ph ph-calendar-check"></i>记录覆盖</div>
+            <div class="f-value num" id="ledgerCoverage">6/7 天</div>
+            <div class="f-note">近 7 天，缺卡不计入</div>
+          </div>
+          <div class="field">
+            <div class="f-label"><i class="ph ph-scales"></i>折算体重</div>
+            <div class="f-value num" id="ledgerKg">~瘦 0.17 kg</div>
+            <div class="f-note">粗略估算</div>
+          </div>
+          <div class="field">
+            <div class="f-label"><i class="ph ph-stack"></i>明细窗口</div>
+            <div class="f-value">30 天</div>
+            <div class="f-note">更早流水已折算为周账</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sg-header">
+        <h2>账本流水</h2>
+        <span class="sub">近 30 天 · 点击行可改账</span>
+        <span class="spacer"></span>
+        <span class="sub">正=瘦 红=超支</span>
+      </div>
+      <div class="sg-panel">
+        <div class="call-table" id="ledgerTable">
+          <div class="call-headrow" aria-hidden="true">
+            <span>日期</span><span style="text-align:right">吃了</span><span style="text-align:right">动了</span><span style="text-align:right">当日余额</span><span style="text-align:right">状态</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="col-right">
+      <div class="dash-header">
+        <h2>周账归档</h2>
+        <span class="spacer"></span>
+        <span class="sub" style="font-size:11.5px;font-weight:600;color:rgba(255,255,255,.72)">30 天前流水</span>
+      </div>
+
+      <div class="metrics">
+        <div class="arch-row"><span class="lk">08-10 ~ 08-16</span><span class="ld">覆盖 1/7 天</span><span class="num pos">+650</span><span class="num kg">~瘦 0.08 kg</span></div>
+        <div class="arch-row"><span class="lk">08-03 ~ 08-09</span><span class="ld">覆盖 2/7 天</span><span class="num pos">+1,700</span><span class="num kg">~瘦 0.22 kg</span></div>
+        <div class="arch-row"><span class="lk">07-27 ~ 08-02</span><span class="ld">覆盖 1/7 天</span><span class="num pos">+1,550</span><span class="num kg">~瘦 0.20 kg</span></div>
+      </div>
+
+      <div class="dash-panel">
+        <div class="panel-head">
+          <span class="lead-icon"><i class="ph ph-archive"></i></span>
+          <h3>归档说明</h3>
+        </div>
+        <p style="font-size:12px;font-weight:500;color:var(--ink-soft);line-height:1.6;padding:0 2px 2px">
+          每日明细保留最近 30 天（含今天）。30 天前的流水按自然周（周一~周日）折算为周账：覆盖 x/7、周盈余、折算 kg。周账只读，超出窗口的日期不能再按天补记。
+        </p>
+      </div>
+
+      <div class="note-card">
+        <span class="lead-icon"><i class="ph ph-shield-check"></i></span>
+        <div>
+          <h4>结算口径</h4>
+          <p>历史账目按当日生效的基础代谢结算，修改 BMR 不追溯重算；连续缺卡超过 3 天会在页头提醒。</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ================================================== 设置页 -->
+  <section class="view" data-view="settings">
+    <section class="col-left">
+      <div class="acct-top">
+        <div class="logo-card"><div class="zh">热量账本</div><div class="en">CALLEDGER</div></div>
+        <div class="tabs" role="tablist" aria-label="视图">
+          <button class="tab" data-goto="today" role="tab" aria-selected="false">今日</button>
+          <button class="tab" data-goto="ledger" role="tab" aria-selected="false">账本</button>
+          <button class="tab active" data-goto="settings" role="tab" aria-selected="true">设置</button>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div>
+          <h1 class="acct-name">设置<span class="date">基础代谢 · 本地数据</span></h1>
+          <div class="big-bal">
+            <div class="val num" id="setBmrVal">1,650</div>
+            <div class="cap">基础代谢 · kcal / 天</div>
+          </div>
+        </div>
+        <div class="fields">
+          <div class="field">
+            <div class="f-label"><i class="ph ph-calendar-check"></i>生效日期</div>
+            <div class="f-value num" id="setEff">09-06</div>
+            <div class="f-note">修改仅影响当日及以后</div>
+          </div>
+          <div class="field">
+            <div class="f-label"><i class="ph ph-history"></i>快照条数</div>
+            <div class="f-value num" id="setSnapshots">3 条</div>
+            <div class="f-note">按生效日期存储</div>
+          </div>
+          <div class="field">
+            <div class="f-label"><i class="ph ph-database"></i>数据存储</div>
+            <div class="f-value">SQLite 单文件</div>
+            <div class="f-note">启动时自动备份最近 3 份</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sg-header">
+        <h2>BMR 设置</h2>
+        <span class="sub">只填基础代谢，运动请记到「动了」</span>
+        <span class="spacer"></span>
+      </div>
+      <div class="sg-panel">
+        <div class="form-row">
+          <div class="field">
+            <label for="bmrInput">基础代谢（kcal / 天）</label>
+            <div class="box"><input id="bmrInput" inputmode="numeric" value="1,650"></div>
+          </div>
+          <span class="entry-warn" id="bmrWarn" hidden>超过 10,000 kcal，再点一次确认</span>
+          <button class="btn-primary" id="bmrSave"><i class="ph ph-check"></i>保存</button>
+        </div>
+        <p class="form-hint" id="bmrHint">修改后从今天起生效，历史账目按当日生效值结算，不追溯重算。</p>
+
+        <div class="divider"></div>
+
+        <div class="helper-head">
+          <span class="lead-icon" style="width:30px;height:30px;font-size:13px"><i class="ph ph-calculator"></i></span>
+          <b>Mifflin-St Jeor 计算助手</b>
+          <span class="sug">建议值<b id="bmrSuggest">1,655</b></span>
+        </div>
+        <div class="helper-grid">
+          <div class="field">
+            <label for="hSex">性别</label>
+            <div class="box"><select id="hSex"><option value="m">男</option><option value="f">女</option></select></div>
+          </div>
+          <div class="field">
+            <label for="hAge">年龄</label>
+            <div class="box"><input id="hAge" inputmode="numeric" value="30"><span class="unit">岁</span></div>
+          </div>
+          <div class="field">
+            <label for="hHeight">身高</label>
+            <div class="box"><input id="hHeight" inputmode="numeric" value="172"><span class="unit">cm</span></div>
+          </div>
+          <div class="field">
+            <label for="hWeight">体重</label>
+            <div class="box"><input id="hWeight" inputmode="decimal" value="68"><span class="unit">kg</span></div>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:14px">
+          <button class="mini-btn" id="bmrAdopt"><i class="ph ph-arrow-down"></i>采用建议值</button>
+          <span class="form-hint" style="margin:0">公式：10 × 体重 + 6.25 × 身高 − 5 × 年龄 + 5（男）/ − 161（女）</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="col-right">
+      <div class="dash-header">
+        <h2>修改历史</h2>
+        <span class="spacer"></span>
+      </div>
+
+      <div class="metrics" id="bmrHistory">
+        <div class="history-row"><span class="lk">09-06 起</span><span class="num">1,650</span><span class="ld">09-06 08:12 设置</span></div>
+        <div class="history-row"><span class="lk">08-20 起</span><span class="num">1,700</span><span class="ld">08-20 09:40 设置</span></div>
+        <div class="history-row"><span class="lk">08-01 起</span><span class="num">1,650</span><span class="ld">08-01 21:05 设置</span></div>
+      </div>
+
+      <div class="note-card">
+        <span class="lead-icon"><i class="ph ph-warning"></i></span>
+        <div>
+          <h4>避免双重计算</h4>
+          <p>这里只填基础代谢（BMR）。如果把运动消耗也算进来，又另外记「动了」，会系统性高估盈余。</p>
+        </div>
+      </div>
+
+      <div class="note-card">
+        <span class="lead-icon"><i class="ph ph-arrows-left-right"></i></span>
+        <div>
+          <h4>符号约定</h4>
+          <p>正 = 瘦，负 = 胖。绿色为盈余方向，红色为超支方向；折算体重仅作参考。</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+  </main>
+</div>
+
+<script>
+const $=(s,c=document)=>c.querySelector(s);
+const $$=(s,c=document)=>[...c.querySelectorAll(s)];
+const fmt=n=>Math.round(Math.abs(n)).toLocaleString('en-US');
+const sign=n=>n>0?'+'+fmt(n):n<0?'-'+fmt(n):'0';
+
+/* ================= 状态（与 PRD 数据契约一致的 mock） ================= */
+/* BMR 快照（R2：按生效日期结算，不追溯重算） */
+let bmrHistory=[
+  {eff:'2026-08-01',v:1650,at:'08-01 21:05'},
+  {eff:'2026-08-20',v:1700,at:'08-20 09:40'},
+  {eff:'2026-09-06',v:1650,at:'09-06 08:12'},
+];
+/* daily_log（R4：一天一条；09-01/02 为窗口内更早日，09-05 缺卡） */
+const days={
+  '09-01':{ate:1900,moved:200,note:''},
+  '09-02':{ate:1950,moved:0,note:''},
+  '09-03':{ate:1500,moved:300,note:''},
+  '09-04':{ate:1400,moved:550,note:''},
+  '09-06':{ate:2300,moved:150,note:'生日聚餐'},
+  '09-07':{ate:1600,moved:450,note:''},
+  '09-08':{ate:2100,moved:0,note:''},
+  '09-09':{ate:1850,moved:600,note:''},
+};
+const WEEKDAYS={'09-01':'周二','09-02':'周三','09-03':'周四','09-04':'周五','09-05':'周六','09-06':'周日','09-07':'周一','09-08':'周二','09-09':'周三'};
+const LEDGER_DATES=['09-01','09-02','09-03','09-04','09-05','09-06','09-07','09-08','09-09'];
+const TODAY='09-09';
+const ROLL_WINDOW=['09-03','09-04','09-05','09-06','09-07','09-08','09-09'];
+const BASE_WEEK_SURPLUS=1300,BASE_BAL=400; /* 今日余额变化前的滚动盈余基准 */
+
+function bmrOn(d){
+  const full='2026-'+d;
+  let v=null;
+  for(const h of bmrHistory){ if(h.eff<=full) v=h.v; }
+  return v;
+}
+function surplus(d){
+  const rec=days[d];
+  if(!rec)return null;
+  return bmrOn(d)+rec.moved-rec.ate;
+}
+function rolling(){
+  let sum=0,covered=0,miss=0;
+  for(const d of ROLL_WINDOW){
+    const s=surplus(d);
+    if(s===null){miss++;continue}
+    sum+=s;covered++;
+  }
+  return {sum,covered,miss};
+}
+
+/* ================= 渲染 ================= */
+function render(){
+  const bal=surplus(TODAY);
+  const today=days[TODAY];
+  const roll=rolling();
+  const curBmr=bmrOn(TODAY);
+
+  /* 今日页：大余额与字段 */
+  const big=$('#bigBal');
+  big.textContent=sign(bal);
+  big.classList.toggle('neg',bal<0);
+  $('#fIn').textContent='+'+fmt(curBmr);
+  $('#fOut').textContent='-'+fmt(today.ate);
+  $('#fEarn').textContent='+'+fmt(today.moved);
+  $('#fBmr').textContent=fmt(curBmr);
+  const lastEff=bmrHistory[bmrHistory.length-1];
+  $('#fBmrNote').textContent='kcal / 天，'+lastEff.eff.slice(5)+' 起生效';
+
+  /* 进度：已用 = (吃了-动了)/BMR */
+  const pct=Math.max(0,Math.round((today.ate-today.moved)/curBmr*100));
+  const fill=$('#meterFill');
+  fill.style.width=Math.min(pct,100)+'%';
+  fill.style.background=bal>=0?'var(--green-deep)':'var(--coral)';
+  $('#meterNote').textContent=bal>=0
+    ? '已用 '+pct+'%，剩余 '+fmt(bal)+' kcal'
+    : '已用 '+pct+'%，超支 '+fmt(-bal)+' kcal';
+
+  /* 近 7 天：滚动盈余 + 今日卡 */
+  $('#weekSurplus').textContent=sign(roll.sum);
+  const td=$('#todayCard');
+  $('#tdAte').textContent=fmt(today.ate);
+  $('#tdMove').textContent=fmt(today.moved);
+  $('#tdBal').textContent=sign(bal);
+  td.classList.toggle('sage',bal>=0);
+  td.classList.toggle('brick',bal<0);
+
+  /* 右栏看板 */
+  $('#stSurplus').textContent=sign(roll.sum);
+  $('#stSurplus').classList.toggle('pos',roll.sum>=0);
+  $('#stSurplus').classList.toggle('neg',roll.sum<0);
+  $('#stCoverage').textContent=roll.covered+'/7 天';
+  $('#stMiss').textContent=roll.miss+' 天';
+  $('#flowerCoverage').textContent=roll.covered+'/7';
+  $('#petalToday ellipse').setAttribute('fill',bal>=0?'#6cc57d':'#e2685a');
+
+  /* 折算体重（R8：7700 kcal ≈ 1 kg，粗略估算） */
+  const kg=Math.abs(roll.sum/7700).toFixed(2);
+  const est=roll.sum>0?'~瘦 '+kg+' kg':roll.sum<0?'~胖 '+kg+' kg':'持平';
+  $('#estKg').textContent=est;
+  $('#estKg').style.color=roll.sum>=0?'var(--green-deep)':'var(--coral-deep)';
+
+  /* BMR 卡 */
+  $('#bmrCardVal').textContent=fmt(curBmr);
+  $('#bmrCardSub').textContent='kcal / 天，'+lastEff.eff.slice(5)+' 起生效';
+
+  /* 账本页汇总 */
+  const lr=$('#ledgerRoll');
+  lr.textContent=sign(roll.sum);
+  lr.classList.toggle('pos',roll.sum>=0);
+  lr.classList.toggle('neg',roll.sum<0);
+  $('#ledgerCoverage').textContent=roll.covered+'/7 天';
+  $('#ledgerKg').textContent=est;
+
+  /* 设置页当前值 */
+  $('#setBmrVal').textContent=fmt(curBmr);
+  $('#setEff').textContent=lastEff.eff.slice(5);
+  $('#setSnapshots').textContent=bmrHistory.length+' 条';
+}
+
+/* ================= 账本流水（渲染 + 行内改账） ================= */
+function ledgerRowHTML(d){
+  const rec=days[d];
+  const s=surplus(d);
+  const isToday=d===TODAY;
+  let state,cls;
+  if(isToday){state='今天';cls='today'}
+  else if(rec){state='已结';cls='ok'}
+  else{state='缺卡 · 可补记';cls='miss'}
+  return `<div class="ledger-item" data-date="${d}">
+    <div class="ledger-row" role="button" tabindex="0" aria-expanded="false" title="点击改账">
+      <span class="c-date">${d}<small>${WEEKDAYS[d]}</small>${rec&&rec.note?'<i class="ph ph-note" title="备注：'+rec.note+'"></i>':''}</span>
+      <span class="c-num ${rec?'':'dim'}">${rec?fmt(rec.ate):'--'}</span>
+      <span class="c-num ${rec?'':'dim'}">${rec?fmt(rec.moved):'--'}</span>
+      <span class="c-num bal ${s===null?'dim':s>=0?'pos':'neg'}">${s===null?'--':sign(s)}</span>
+      <span class="c-state"><span class="status-pill ${cls}">${state}</span></span>
+    </div>
+    <div class="row-edit"><div><div class="row-edit-inner">
+      <div class="field"><label>吃了</label><div class="box"><input class="e-ate" inputmode="numeric" value="${rec?fmt(rec.ate):''}" placeholder="0"><span class="unit">kcal</span></div></div>
+      <div class="field"><label>动了</label><div class="box"><input class="e-move" inputmode="numeric" value="${rec?fmt(rec.moved):''}" placeholder="0"><span class="unit">kcal</span></div></div>
+      <div class="field note"><label>备注</label><div class="box"><input class="e-note" value="${rec?rec.note:''}" placeholder="选填"></div></div>
+      <span class="row-edit-warn" hidden>超过 10,000 kcal，再点一次确认</span>
+      <button class="btn-primary e-save" style="height:38px;padding:0 16px;font-size:12px"><i class="ph ph-check"></i>保存</button>
+      <button class="mini-btn ghost e-cancel">取消</button>
+    </div></div></div>
+  </div>`;
+}
+function renderLedger(){
+  const box=$('#ledgerTable');
+  box.innerHTML='<div class="call-headrow" aria-hidden="true"><span>日期</span><span style="text-align:right">吃了</span><span style="text-align:right">动了</span><span style="text-align:right">当日余额</span><span style="text-align:right">状态</span></div>'
+    + LEDGER_DATES.map(ledgerRowHTML).join('');
+  $$('#ledgerTable .ledger-item').forEach(bindLedgerItem);
+}
+function parseNum(v){const n=Number(String(v).replace(/[,，\s]/g,''));return Number.isFinite(n)&&n>=0?n:null}
+
+function bindLedgerItem(item){
+  const d=item.dataset.date;
+  const row=$('.ledger-row',item);
+  const toggle=()=>{
+    const open=item.classList.toggle('open');
+    row.setAttribute('aria-expanded',open);
+    if(open){const i=$('.e-ate',item);if(i){i.focus();i.select()}}
+  };
+  row.addEventListener('click',toggle);
+  row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}});
+  let armed=false;
+  $('.e-save',item).addEventListener('click',()=>{
+    const ate=parseNum($('.e-ate',item).value);
+    const moved=parseNum($('.e-move',item).value);
+    const warn=$('.row-edit-warn',item);
+    if(ate===null||moved===null){item.style.outline='2px solid var(--coral)';setTimeout(()=>item.style.outline='',600);return}
+    if((ate>10000||moved>10000)&&!armed){armed=true;warn.hidden=false;return}
+    days[d]={ate,moved,note:$('.e-note',item).value.trim()};
+    armed=false;warn.hidden=true;
+    render();renderLedger();
+  });
+  $('.e-cancel',item).addEventListener('click',()=>{armed=false;$('.row-edit-warn',item).hidden=true;renderLedger()});
+}
+renderLedger();
+
+/* ================= 今日页：记一笔（R4/R6，回车即存） ================= */
+let armed=false;
+function saveToday(){
+  const ate=parseNum($('#ateInput').value), moved=parseNum($('#moveInput').value);
+  const warn=$('#entryWarn');
+  if(ate===null||moved===null){
+    $('#entry').style.outline='2px solid var(--coral)';
+    setTimeout(()=>$('#entry').style.outline='',600);
+    return;
+  }
+  if((ate>10000||moved>10000)&&!armed){armed=true;warn.hidden=false;$('#saveBtn').classList.add('arm');return}
+  days[TODAY]={ate,moved,note:days[TODAY].note||''};
+  armed=false;warn.hidden=true;$('#saveBtn').classList.remove('arm');
+  render();renderLedger();
+}
+$('#saveBtn').addEventListener('click',saveToday);
+[$('#ateInput'),$('#moveInput')].forEach(i=>{
+  i.addEventListener('keydown',e=>{if(e.key==='Enter')saveToday()});
+  i.addEventListener('input',()=>{armed=false;$('#entryWarn').hidden=true;$('#saveBtn').classList.remove('arm')});
+  i.addEventListener('blur',()=>{const n=parseNum(i.value);if(n!==null)i.value=fmt(n)});
+});
+
+/* ================= 设置页：BMR 修改（R2） + 计算助手 ================= */
+let bmrArmed=false;
+$('#bmrSave').addEventListener('click',()=>{
+  const v=parseNum($('#bmrInput').value);
+  const warn=$('#bmrWarn');
+  if(v===null||v<=0){
+    $('#bmrInput').style.borderColor='var(--coral)';
+    setTimeout(()=>$('#bmrInput').style.borderColor='',600);
+    return;
+  }
+  const cur=bmrOn(TODAY);
+  if((v>10000)&&!bmrArmed){bmrArmed=true;warn.hidden=false;$('#bmrSave').classList.add('arm');return}
+  if(v!==cur){
+    const now=new Date();
+    const at=String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    bmrHistory.push({eff:'2026-'+TODAY,v,at});
+    $('#bmrInput').value=fmt(v);
+    $('#bmrHint').textContent='已生效：从今天起按 '+fmt(v)+' kcal 结算，历史账目不变。';
+  }
+  bmrArmed=false;warn.hidden=true;$('#bmrSave').classList.remove('arm');
+  render();renderBmrHistory();
+});
+$('#bmrInput').addEventListener('input',()=>{bmrArmed=false;$('#bmrWarn').hidden=true;$('#bmrSave').classList.remove('arm')});
+
+function computeSuggest(){
+  const sex=$('#hSex').value;
+  const age=Number($('#hAge').value)||0;
+  const h=Number($('#hHeight').value)||0;
+  const w=Number($('#hWeight').value)||0;
+  const v=Math.round(10*w+6.25*h-5*age+(sex==='m'?5:-161));
+  $('#bmrSuggest').textContent=fmt(Math.max(v,0));
+  return v;
+}
+['hSex','hAge','hHeight','hWeight'].forEach(id=>$('#'+id).addEventListener('input',computeSuggest));
+$('#hSex').addEventListener('change',computeSuggest);
+computeSuggest();
+$('#bmrAdopt').addEventListener('click',()=>{
+  $('#bmrInput').value=fmt(Math.max(computeSuggest(),0));
+  $('#bmrInput').focus();
+});
+
+function renderBmrHistory(){
+  const rows=[...bmrHistory].reverse().map(h=>
+    `<div class="history-row"><span class="lk">${h.eff.slice(5)} 起</span><span class="num">${fmt(h.v)}</span><span class="ld">${h.at} 设置</span></div>`).join('');
+  $('#bmrHistory').innerHTML=rows;
+}
+
+/* ================= 视图切换 / 顶栏 ================= */
+function goto(view){
+  $$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
+  $$('.modules .mod').forEach(m=>{
+    const target=m.dataset.goto;
+    const on=(target===view)||(view==='today'&&m.id==='modEntry'&&false);
+    m.classList.toggle('active',!!target&&target===view);
+    if(m.hasAttribute('aria-current')&&!on)m.removeAttribute('aria-current');
+    if(on)m.setAttribute('aria-current','page');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+$$('[data-goto]').forEach(el=>el.addEventListener('click',()=>goto(el.dataset.goto)));
+function focusEntry(){
+  goto('today');
+  const i=$('#ateInput');i.focus();i.select();
+  $('#entry').scrollIntoView({behavior:'smooth',block:'center'});
+}
+$('#modEntry').addEventListener('click',focusEntry);
+$('#modWeek').addEventListener('click',()=>goto('ledger'));
+$('#editBtn').addEventListener('click',focusEntry);
+$('#ledgerAdd').addEventListener('click',focusEntry);
+$('#goBill').addEventListener('click',()=>{
+  goto('ledger');
+  setTimeout(()=>$('.dash-header').scrollIntoView({behavior:'smooth',block:'center'}),80);
+});
+const bell=$('#bell');
+bell.addEventListener('click',()=>{
+  bell.classList.remove('unread');
+  bell.title='没有新提醒';
+});
+$('#backBtn').addEventListener('click',()=>{if(history.length>1)history.back()});
+
+render();
+</script>
+</body>
+</html>

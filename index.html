@@ -2,7 +2,14 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4a4a48">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="热量账本">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>热量账本 CalLedger · 原型</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,9 +51,10 @@ body{
   padding:38px clamp(16px,4vw,64px);
   display:flex;justify-content:center;
   -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
   letter-spacing:-.01em;
 }
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 input,select{font:inherit;color:inherit}
 .num{font-variant-numeric:tabular-nums lining-nums}
 i.ph,i.ph-bold,i.ph-fill{line-height:1}
@@ -443,6 +451,32 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
   *{animation:none!important;transition:none!important}
 }
 
+/* ---- 移动端：底部 Tab 栏 + 悬浮记一笔（桌面隐藏） ---- */
+.tabbar{
+  display:none;position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:rgba(252,252,251,.92);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);
+  border-top:1px solid rgba(25,27,24,.08);
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+  justify-content:space-around;
+}
+.tb-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  padding:6px 0;min-height:46px;border-radius:12px;
+  color:var(--mute);font-size:10.5px;font-weight:700;
+}
+.tb-item i{font-size:20px}
+.tb-item.active{color:var(--green-deep)}
+.fab{
+  display:none;position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:50;
+  width:56px;height:56px;border-radius:50%;
+  background:var(--green-deep);color:#fff;font-size:24px;
+  align-items:center;justify-content:center;
+  box-shadow:0 10px 24px rgba(46,125,74,.36);
+  transition:transform .18s var(--ease);
+}
+.fab:active{transform:scale(.92)}
+
 /* ============ 响应式 ============ */
 @media (max-width:1280px){
   .view.active{grid-template-columns:minmax(0,1fr) 372px}
@@ -464,11 +498,37 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
   .flower{justify-self:center}
   .helper-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+/* ---- 移动端适配（≤768px）：单列 + 底部 Tab + 悬浮记一笔 ---- */
+@media (max-width:768px){
+  body{padding:calc(10px + env(safe-area-inset-top)) 8px calc(96px + env(safe-area-inset-bottom));}
+  .app{padding:12px 12px 0;border-radius:22px}
+  .topbar{grid-template-columns:1fr auto;gap:10px;margin-bottom:14px}
+  .tb-left{gap:10px}
+  .tb-left .icon-btn{display:none}
+  .modules{display:none}
+  .icon-btn{width:44px;height:44px}
+  .acct-top{display:none}
+  .hero{grid-template-columns:1fr;gap:20px;margin-bottom:28px}
+  .hero-val{font-size:56px}
+  .entry{margin-bottom:28px;padding:14px}
+  .sg-panel{padding:12px}
+  .day-card{flex-basis:172px;scroll-snap-align:start}
+  .day-strip{scroll-snap-type:x proximity}
+  .metrics-body{grid-template-columns:1fr;justify-items:start;gap:10px}
+  .flower{justify-self:center;width:160px;height:160px}
+  .searchbar{left:12px;right:12px;top:64px}
+  .sg-header h2{white-space:nowrap}
+  .sg-header .legend{display:none}
+  .tabbar{display:flex}
+  .fab{display:flex}
+  .status-pill{white-space:nowrap;padding:5px 9px}
+  .panel-head h3,.bmr-card h3,.bottom-card h3{white-space:nowrap}
+}
 @media (max-width:640px){
-  body{padding:16px 10px}
-  .app{padding:14px 14px 0}
-  .call-headrow,.ledger-row{grid-template-columns:1.1fr .7fr .7fr .9fr 28px}
-  .c-state{display:none}
+  body{padding:calc(10px + env(safe-area-inset-top)) 6px calc(96px + env(safe-area-inset-bottom));}
+  .app{padding:12px 10px 0}
+  .call-headrow,.ledger-row{grid-template-columns:1.05fr .9fr .8fr 28px}
+  .c-ate,.c-move{display:none}
 }
 </style>
 </head>
@@ -571,7 +631,7 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
         <h2>近 7 天</h2>
         <span class="sub">滚动盈余 <span class="num" id="weekSurplus">+1,300</span></span>
         <span class="spacer"></span>
-        <span class="sub">绿=盈余 红=超支 黄=缺卡</span>
+        <span class="sub legend">绿=盈余 红=超支 黄=缺卡</span>
         <button class="head-dot" data-goto="ledger" title="完整账本" aria-label="完整账本"><i class="ph ph-arrow-up-right"></i></button>
       </div>
       <div class="sg-panel">
@@ -889,6 +949,18 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
   </main>
 </div>
 
+<!-- 移动端：底部 Tab 栏 + 悬浮记一笔 -->
+<nav class="tabbar" aria-label="底部导航">
+  <button class="tb-item active" data-goto="today"><i class="ph-fill ph-house"></i><span>今日</span></button>
+  <button class="tb-item" data-goto="ledger"><i class="ph ph-book-open"></i><span>账本</span></button>
+  <button class="tb-item" data-goto="settings"><i class="ph ph-gear"></i><span>设置</span></button>
+</nav>
+<button class="fab" id="fabEntry" title="记一笔" aria-label="记一笔"><i class="ph ph-plus"></i></button>
+
+<script>
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+</script>
+
 <script>
 const $=(s,c=document)=>c.querySelector(s);
 const $$=(s,c=document)=>[...c.querySelectorAll(s)];
@@ -1018,8 +1090,8 @@ function ledgerRowHTML(d){
   return `<div class="ledger-item" data-date="${d}">
     <div class="ledger-row" role="button" tabindex="0" aria-expanded="false" title="点击改账">
       <span class="c-date">${d}<small>${WEEKDAYS[d]}</small>${rec&&rec.note?'<i class="ph ph-note" title="备注：'+rec.note+'"></i>':''}</span>
-      <span class="c-num ${rec?'':'dim'}">${rec?fmt(rec.ate):'--'}</span>
-      <span class="c-num ${rec?'':'dim'}">${rec?fmt(rec.moved):'--'}</span>
+      <span class="c-num c-ate ${rec?'':'dim'}">${rec?fmt(rec.ate):'--'}</span>
+      <span class="c-num c-move ${rec?'':'dim'}">${rec?fmt(rec.moved):'--'}</span>
       <span class="c-num bal ${s===null?'dim':s>=0?'pos':'neg'}">${s===null?'--':sign(s)}</span>
       <span class="c-state"><span class="status-pill ${cls}">${state}</span></span>
       <span class="c-chev"><i class="ph-bold ph-caret-down"></i></span>
@@ -1036,7 +1108,7 @@ function ledgerRowHTML(d){
 }
 function renderLedger(){
   const box=$('#ledgerTable');
-  box.innerHTML='<div class="call-headrow" aria-hidden="true"><span>日期</span><span style="text-align:right">吃了</span><span style="text-align:right">动了</span><span style="text-align:right">当日余额</span><span style="text-align:right">状态</span><span></span></div>'
+  box.innerHTML='<div class="call-headrow" aria-hidden="true"><span>日期</span><span class="c-ate" style="text-align:right">吃了</span><span class="c-move" style="text-align:right">动了</span><span style="text-align:right">当日余额</span><span style="text-align:right">状态</span><span></span></div>'
     + LEDGER_DATES.map(ledgerRowHTML).join('')
     + '<div class="table-empty" id="ledgerEmpty" hidden>没有匹配的流水</div>';
   $$('#ledgerTable .ledger-item').forEach(bindLedgerItem);
@@ -1161,12 +1233,11 @@ function renderBmrHistory(){
 /* ================= 视图切换 / 顶栏 ================= */
 function goto(view){
   $$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
-  $$('.modules .mod').forEach(m=>{
+  $$('.modules .mod, .tabbar .tb-item').forEach(m=>{
     const target=m.dataset.goto;
-    const on=(target===view)||(view==='today'&&m.id==='modEntry'&&false);
-    m.classList.toggle('active',!!target&&target===view);
-    if(m.hasAttribute('aria-current')&&!on)m.removeAttribute('aria-current');
-    if(on)m.setAttribute('aria-current','page');
+    const on=!!target&&target===view;
+    m.classList.toggle('active',on);
+    if(on)m.setAttribute('aria-current','page');else m.removeAttribute('aria-current');
   });
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1178,6 +1249,7 @@ function focusEntry(){
 }
 $('#modEntry').addEventListener('click',focusEntry);
 $('#modWeek').addEventListener('click',()=>goto('ledger'));
+$('#fabEntry').addEventListener('click',focusEntry);
 $('#editBtn').addEventListener('click',focusEntry);
 $('#ledgerAdd').addEventListener('click',focusEntry);
 $('#goBill').addEventListener('click',()=>{

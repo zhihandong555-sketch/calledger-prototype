@@ -53,6 +53,7 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
 
 /* ============ 应用壳 ============ */
 .app{
+  position:relative;
   flex:0 1 1440px;min-width:0;
   background:var(--bg-app);
   border-radius:var(--r-app);
@@ -105,7 +106,7 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
 .col-left{min-width:0;margin-bottom:24px}
 
 /* ---- 账户头 ---- */
-.acct-top{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.acct-top{display:flex;align-items:center;gap:14px;margin-bottom:36px}
 .logo-card{
   background:var(--card);border-radius:20px;box-shadow:var(--shadow-card);
   width:128px;height:64px;flex:none;
@@ -148,7 +149,7 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
 /* ---- 记一笔 ---- */
 .entry{
   display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
-  padding:18px 20px;margin-bottom:26px;
+  padding:18px 20px;margin-bottom:40px;
   background:var(--panel);border-radius:var(--r-lg);
   transition:outline .1s;
 }
@@ -375,6 +376,52 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
 .history-row .ld{font-size:11px;font-weight:600;color:var(--mute);margin-left:auto;font-variant-numeric:tabular-nums}
 .history-row .num{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
 
+/* ---- 今日 hero（冯·雷斯托夫：全页最大异质元素=余额） ---- */
+.hero{display:grid;grid-template-columns:minmax(280px,420px) minmax(0,1fr);gap:40px;align-items:end;margin-bottom:40px}
+.hero-label{font-size:15px;font-weight:800;color:var(--black)}
+.hero-label .date{font-size:12px;font-weight:600;color:var(--mute);margin-left:10px;letter-spacing:0}
+.hero-val{font-size:72px;font-weight:800;letter-spacing:-.03em;color:var(--green-deep);line-height:1;margin-top:12px}
+.hero-val.neg{color:var(--coral-deep)}
+.hero-cap{font-size:13px;font-weight:700;color:var(--mute);margin-top:12px}
+.hero-meter{max-width:340px;margin-top:14px}
+.formula{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.chip{background:var(--card);border-radius:18px;box-shadow:var(--shadow-card);padding:14px 16px}
+.chip .k{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--mute)}
+.chip .k i{font-size:13px}
+.chip .v{font-size:20px;font-weight:800;letter-spacing:-.01em;margin-top:5px;font-variant-numeric:tabular-nums}
+.chip .v.pos{color:var(--green-deep)}
+.chip .v.neg{color:var(--coral-deep)}
+.chip .n{font-size:10.5px;font-weight:600;color:var(--mute);margin-top:3px}
+/* ---- 日卡（米勒定律：信息块 4→3） ---- */
+.day-io{margin-top:11px;font-size:11px;font-weight:700;opacity:.62;display:flex;gap:10px;font-variant-numeric:tabular-nums}
+.day-bal{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.45);display:flex;justify-content:space-between;align-items:baseline}
+.day-bal .lk{font-size:11px;font-weight:700;opacity:.62}
+.day-bal .lv{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.day-card{cursor:pointer}
+/* ---- 绿色保存钮（冯·雷斯托夫：全页唯一异色动作） ---- */
+.btn-primary.green{background:var(--green-deep);box-shadow:0 8px 20px rgba(46,125,74,.28)}
+.btn-primary.green:hover{background:#276b40}
+.btn-primary.green.arm{background:var(--coral);box-shadow:none}
+/* ---- 右栏合并卡（接近性：标题与内容同一容器） ---- */
+.sum-card{position:relative;z-index:2;box-shadow:var(--shadow-float);border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px}
+.sum-head{background:var(--black);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:12px}
+.sum-head h2{font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+.sum-head .sub{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.72);margin-left:auto}
+.sum-body{background:var(--card);padding:16px 18px 14px}
+/* ---- 搜索条（雅各布定律：展开为常规搜索框） ---- */
+.searchbar{position:absolute;top:76px;left:26px;right:26px;z-index:40;background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow-float);display:flex;align-items:center;gap:10px;padding:12px 16px}
+.searchbar i.lead{font-size:16px;color:var(--mute)}
+.searchbar input{flex:1;min-width:0;border:0;outline:0;background:none;font-size:14px;font-weight:600}
+.searchbar input:focus-visible{outline:none}
+.searchbar .close{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--mute)}
+.searchbar .close:hover{background:rgba(25,27,24,.06)}
+/* ---- 流水行 chevron（雅各布定律：行尾箭头=可展开） ---- */
+.call-headrow,.ledger-row{grid-template-columns:1.2fr .85fr .85fr 1fr .95fr 28px}
+.c-chev{display:inline-flex;align-items:center;justify-content:center;color:var(--mute);font-size:13px;transition:transform .28s var(--ease)}
+.ledger-item.open .c-chev{transform:rotate(180deg)}
+.ledger-item.hide{display:none}
+.table-empty{padding:26px;text-align:center;font-size:12px;font-weight:600;color:var(--mute)}
+
 /* ============ 焦点与动效 ============ */
 :where(button,input,select):focus-visible{outline:2px solid var(--black);outline-offset:2px;border-radius:999px}
 .field input:focus-visible,.field select:focus-visible{outline:none}
@@ -420,7 +467,7 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
 @media (max-width:640px){
   body{padding:16px 10px}
   .app{padding:14px 14px 0}
-  .call-headrow,.ledger-row{grid-template-columns:1.2fr .8fr .8fr 1fr}
+  .call-headrow,.ledger-row{grid-template-columns:1.1fr .7fr .7fr .9fr 28px}
   .c-state{display:none}
 }
 </style>
@@ -439,17 +486,23 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
       <button class="mod active" data-goto="today" title="今日" aria-current="page"><i class="ph ph-house"></i></button>
       <button class="mod" data-goto="ledger" title="账本"><i class="ph ph-book-open"></i></button>
       <button class="mod" id="modEntry" title="记一笔"><i class="ph ph-plus"></i></button>
-      <button class="mod" title="统计（V2 规划）"><i class="ph ph-chart-pie"></i></button>
       <button class="mod" id="modWeek" title="周账归档"><i class="ph ph-calendar-blank"></i></button>
       <button class="mod" data-goto="settings" title="设置"><i class="ph ph-gear"></i></button>
     </nav>
 
     <div class="tb-right">
-      <button class="icon-btn" title="搜索" aria-label="搜索"><i class="ph ph-magnifying-glass"></i></button>
+      <button class="icon-btn" id="searchBtn" title="搜索" aria-label="搜索"><i class="ph ph-magnifying-glass"></i></button>
       <button class="icon-btn bell unread" id="bell" title="09-05 缺卡，可补记" aria-label="提醒"><i class="ph ph-bell"></i><span class="dot"></span></button>
       <span class="avatar" title="V">V</span>
     </div>
   </header>
+
+  <!-- 雅各布定律：搜索展开为常规搜索框，过滤账本流水 -->
+  <div class="searchbar" id="searchBar" hidden>
+    <i class="ph ph-magnifying-glass lead"></i>
+    <input id="searchInput" placeholder="搜日期或备注，如 09-05 / 聚餐" aria-label="搜索账本流水">
+    <button class="close" id="searchClose" title="关闭搜索" aria-label="关闭搜索"><i class="ph ph-x"></i></button>
+  </div>
 
   <main>
   <!-- ================================================== 今日页 -->
@@ -465,38 +518,32 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
         <button class="icon-btn white" id="editBtn" title="记一笔" aria-label="记一笔"><i class="ph ph-pencil-simple"></i></button>
       </div>
 
-      <div class="pane">
+      <!-- 冯·雷斯托夫效应：全页最大异质元素 = 今日余额；米勒定律：公式分解为 3 个信息块 -->
+      <div class="hero">
         <div>
-          <h1 class="acct-name">今日<span class="date">2026-09-09 周三</span></h1>
-          <div class="big-bal">
-            <div class="val num" id="bigBal">+400</div>
-            <div class="cap">今日余额 · kcal</div>
-          </div>
-        </div>
-        <div class="fields">
-          <div class="field">
-            <div class="f-label"><i class="ph ph-download-simple"></i>到账</div>
-            <div class="f-value num" id="fIn">+1,650</div>
-            <div class="f-note">基础代谢额度</div>
-          </div>
-          <div class="field">
-            <div class="f-label"><i class="ph ph-upload-simple"></i>消费</div>
-            <div class="f-value neg num" id="fOut">-1,850</div>
-            <div class="f-note">今日饮食摄入</div>
-          </div>
-          <div class="field">
-            <div class="f-label"><i class="ph ph-trend-up"></i>攒回</div>
-            <div class="f-value pos num" id="fEarn">+600</div>
-            <div class="f-note">慢跑 40 分钟</div>
-          </div>
-          <div class="field">
-            <div class="f-label"><i class="ph ph-book-open"></i>基础代谢</div>
-            <div class="f-value num" id="fBmr">1,650</div>
-            <div class="f-note" id="fBmrNote">kcal / 天，09-06 起生效</div>
-          </div>
-          <div class="meter-cell">
+          <div class="hero-label">今日<span class="date">2026-09-09 周三</span></div>
+          <div class="hero-val num" id="bigBal">+400</div>
+          <div class="hero-cap">今日余额 · kcal</div>
+          <div class="hero-meter">
             <div class="meter"><i id="meterFill"></i></div>
             <p class="meter-note" id="meterNote">已用 76%，剩余 400 kcal</p>
+          </div>
+        </div>
+        <div class="formula">
+          <div class="chip">
+            <div class="k"><i class="ph ph-download-simple"></i>到账</div>
+            <div class="v pos num" id="fIn">+1,650</div>
+            <div class="n">基础代谢额度</div>
+          </div>
+          <div class="chip">
+            <div class="k"><i class="ph ph-upload-simple"></i>消费</div>
+            <div class="v neg num" id="fOut">-1,850</div>
+            <div class="n">今日饮食摄入</div>
+          </div>
+          <div class="chip">
+            <div class="k"><i class="ph ph-trend-up"></i>攒回</div>
+            <div class="v pos num" id="fEarn">+600</div>
+            <div class="n">慢跑 40 分钟</div>
           </div>
         </div>
       </div>
@@ -515,7 +562,7 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
           <div class="box"><input id="moveInput" inputmode="numeric" value="600" aria-label="动了多少 kcal"><span class="unit">kcal</span></div>
         </div>
         <span class="entry-warn" id="entryWarn" hidden>超过 10,000 kcal，再点一次确认</span>
-        <button class="btn-primary" id="saveBtn">
+        <button class="btn-primary green" id="saveBtn">
           <i class="ph ph-plus"></i>保存<span class="kbd">↵</span>
         </button>
       </div>
@@ -529,107 +576,87 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
       </div>
       <div class="sg-panel">
         <div class="day-strip" id="dayStrip">
-          <article class="day-card sage" data-day="09-03">
+          <article class="day-card sage" data-day="09-03" title="点击改账">
             <div class="day-top"><span class="day-ava">03</span><div class="day-name">09/03<small>周四</small></div></div>
-            <div class="day-rows">
-              <div class="day-row"><span class="lk">吃了</span><span class="lv">1,500</span></div>
-              <div class="day-row"><span class="lk">动了</span><span class="lv">300</span></div>
-              <div class="day-row"><span class="lk">余额</span><span class="lv">+500</span></div>
-            </div>
+            <div class="day-io">吃 1,500 · 动 300</div>
+            <div class="day-bal"><span class="lk">余额</span><span class="lv num">+500</span></div>
           </article>
-          <article class="day-card sage" data-day="09-04">
+          <article class="day-card sage" data-day="09-04" title="点击改账">
             <div class="day-top"><span class="day-ava">04</span><div class="day-name">09/04<small>周五</small></div></div>
-            <div class="day-rows">
-              <div class="day-row"><span class="lk">吃了</span><span class="lv">1,400</span></div>
-              <div class="day-row"><span class="lk">动了</span><span class="lv">550</span></div>
-              <div class="day-row"><span class="lk">余额</span><span class="lv">+850</span></div>
-            </div>
+            <div class="day-io">吃 1,400 · 动 550</div>
+            <div class="day-bal"><span class="lk">余额</span><span class="lv num">+850</span></div>
           </article>
-          <article class="day-card sand" data-day="09-05">
+          <article class="day-card sand" data-day="09-05" title="点击补记">
             <div class="day-top"><span class="day-ava">05</span><div class="day-name">09/05<small>周六</small></div></div>
-            <div class="day-rows">
-              <div class="day-row"><span class="lk">状态</span><span class="lv">缺卡</span></div>
-              <div class="day-row"><span class="lk">结算</span><span class="lv">不计入</span></div>
-              <div class="day-row"><span class="lk">补记</span><span class="lv">可补</span></div>
-            </div>
+            <div class="day-io">缺卡 · 不计入</div>
+            <div class="day-bal"><span class="lk">补记</span><span class="lv">可补</span></div>
           </article>
-          <article class="day-card brick" data-day="09-06">
+          <article class="day-card brick" data-day="09-06" title="点击改账">
             <div class="day-top"><span class="day-ava">06</span><div class="day-name">09/06<small>周日</small></div></div>
-            <div class="day-rows">
-              <div class="day-row"><span class="lk">吃了</span><span class="lv">2,300</span></div>
-              <div class="day-row"><span class="lk">动了</span><span class="lv">150</span></div>
-              <div class="day-row"><span class="lk">余额</span><span class="lv">-500</span></div>
-            </div>
+            <div class="day-io">吃 2,300 · 动 150</div>
+            <div class="day-bal"><span class="lk">余额</span><span class="lv num">-500</span></div>
           </article>
-          <article class="day-card sage" data-day="09-07">
+          <article class="day-card sage" data-day="09-07" title="点击改账">
             <div class="day-top"><span class="day-ava">07</span><div class="day-name">09/07<small>周一</small></div></div>
-            <div class="day-rows">
-              <div class="day-row"><span class="lk">吃了</span><span class="lv">1,600</span></div>
-              <div class="day-row"><span class="lk">动了</span><span class="lv">450</span></div>
-              <div class="day-row"><span class="lk">余额</span><span class="lv">+500</span></div>
-            </div>
+            <div class="day-io">吃 1,600 · 动 450</div>
+            <div class="day-bal"><span class="lk">余额</span><span class="lv num">+500</span></div>
           </article>
-          <article class="day-card brick" data-day="09-08">
+          <article class="day-card brick" data-day="09-08" title="点击改账">
             <div class="day-top"><span class="day-ava">08</span><div class="day-name">09/08<small>周二</small></div></div>
-            <div class="day-rows">
-              <div class="day-row"><span class="lk">吃了</span><span class="lv">2,100</span></div>
-              <div class="day-row"><span class="lk">动了</span><span class="lv">0</span></div>
-              <div class="day-row"><span class="lk">余额</span><span class="lv">-450</span></div>
-            </div>
+            <div class="day-io">吃 2,100 · 动 0</div>
+            <div class="day-bal"><span class="lk">余额</span><span class="lv num">-450</span></div>
           </article>
-          <article class="day-card sage" data-day="09-09" id="todayCard">
+          <article class="day-card sage" data-day="09-09" id="todayCard" title="点击改账">
             <div class="day-top"><span class="day-ava">09</span><div class="day-name">09/09<small>周三 · 今天</small></div></div>
-            <div class="day-rows">
-              <div class="day-row"><span class="lk">吃了</span><span class="lv" id="tdAte">1,850</span></div>
-              <div class="day-row"><span class="lk">动了</span><span class="lv" id="tdMove">600</span></div>
-              <div class="day-row"><span class="lk">余额</span><span class="lv" id="tdBal">+400</span></div>
-            </div>
+            <div class="day-io" id="tdIo">吃 1,850 · 动 600</div>
+            <div class="day-bal"><span class="lk">余额</span><span class="lv num" id="tdBal">+400</span></div>
           </article>
         </div>
       </div>
     </section>
 
     <aside class="col-right">
-      <div class="dash-header">
-        <h2>滚动 7 天小结</h2>
-        <span class="spacer"></span>
-        <button class="head-dot" id="goBill" title="查看周账单" aria-label="查看周账单"><i class="ph ph-arrow-up-right"></i></button>
-      </div>
-
-      <div class="metrics">
-        <div class="metrics-body">
-          <div class="stats">
-            <div class="stat">
-              <div class="s-label"><i style="background:var(--green-deep)"></i>滚动盈余</div>
-              <div class="s-value pos num" id="stSurplus">+1,300</div>
+      <div class="sum-card">
+        <div class="sum-head">
+          <h2>滚动 7 天小结</h2>
+          <span class="spacer"></span>
+          <button class="head-dot" id="goBill" title="查看周账单" aria-label="查看周账单"><i class="ph ph-arrow-up-right"></i></button>
+        </div>
+        <div class="sum-body">
+          <div class="metrics-body">
+            <div class="stats">
+              <div class="stat">
+                <div class="s-label"><i style="background:var(--green-deep)"></i>滚动盈余</div>
+                <div class="s-value pos num" id="stSurplus">+1,300</div>
+              </div>
+              <div class="stat">
+                <div class="s-label"><i style="background:var(--ink-soft)"></i>记录覆盖</div>
+                <div class="s-value num" id="stCoverage">6/7 天</div>
+              </div>
+              <div class="stat">
+                <div class="s-label"><i style="background:var(--lime-deep)"></i>缺卡天数</div>
+                <div class="s-value num" id="stMiss">1 天</div>
+              </div>
             </div>
-            <div class="stat">
-              <div class="s-label"><i style="background:var(--ink-soft)"></i>记录覆盖</div>
-              <div class="s-value num" id="stCoverage">6/7 天</div>
+            <div class="flower">
+              <svg viewBox="0 0 230 230" role="img" aria-label="近 7 天：5 天盈余、1 天超支、1 天缺卡，已记录 6/7">
+                <g class="petals">
+                  <g class="petal" transform="rotate(0 115 118)"><ellipse cx="115" cy="70" rx="29" ry="46" fill="#6cc57d"><title>09/03 盈余 +500</title></ellipse></g>
+                  <g class="petal" transform="rotate(51.4 115 118)"><ellipse cx="115" cy="71" rx="30" ry="47" fill="#5cb974"><title>09/04 盈余 +850</title></ellipse></g>
+                  <g class="petal" transform="rotate(102.8 115 118)"><ellipse cx="115" cy="70" rx="28" ry="44" fill="#d8e455"><title>09/05 缺卡</title></ellipse></g>
+                  <g class="petal" transform="rotate(154.2 115 118)"><ellipse cx="115" cy="72" rx="30" ry="47" fill="#e2685a"><title>09/06 超支 -500</title></ellipse></g>
+                  <g class="petal" transform="rotate(205.6 115 118)"><ellipse cx="115" cy="70" rx="29" ry="45" fill="#4aa96b"><title>09/07 盈余 +500</title></ellipse></g>
+                  <g class="petal" transform="rotate(257 115 118)"><ellipse cx="115" cy="71" rx="30" ry="46" fill="#e2685a"><title>09/08 超支 -450</title></ellipse></g>
+                  <g class="petal" id="petalToday" transform="rotate(308.4 115 118)"><ellipse cx="115" cy="70" rx="29" ry="46" fill="#6cc57d"><title>09/09 今天</title></ellipse></g>
+                </g>
+                <circle cx="115" cy="118" r="36" fill="#ffffff"/>
+                <text class="big" x="115" y="122" id="flowerCoverage">6/7</text>
+                <text class="mid" x="115" y="136">已记录</text>
+                <text class="lbl" x="150" y="22">盈余</text>
+                <text class="lbl" x="212" y="124">超支</text>
+                <text class="lbl" x="106" y="224">缺卡</text>
+              </svg>
             </div>
-            <div class="stat">
-              <div class="s-label"><i style="background:var(--lime-deep)"></i>缺卡天数</div>
-              <div class="s-value num" id="stMiss">1 天</div>
-            </div>
-          </div>
-          <div class="flower">
-            <svg viewBox="0 0 230 230" role="img" aria-label="近 7 天：5 天盈余、1 天超支、1 天缺卡，已记录 6/7">
-              <g class="petals">
-                <g class="petal" transform="rotate(0 115 118)"><ellipse cx="115" cy="70" rx="29" ry="46" fill="#6cc57d"><title>09/03 盈余 +500</title></ellipse></g>
-                <g class="petal" transform="rotate(51.4 115 118)"><ellipse cx="115" cy="71" rx="30" ry="47" fill="#5cb974"><title>09/04 盈余 +850</title></ellipse></g>
-                <g class="petal" transform="rotate(102.8 115 118)"><ellipse cx="115" cy="70" rx="28" ry="44" fill="#d8e455"><title>09/05 缺卡</title></ellipse></g>
-                <g class="petal" transform="rotate(154.2 115 118)"><ellipse cx="115" cy="72" rx="30" ry="47" fill="#e2685a"><title>09/06 超支 -500</title></ellipse></g>
-                <g class="petal" transform="rotate(205.6 115 118)"><ellipse cx="115" cy="70" rx="29" ry="45" fill="#4aa96b"><title>09/07 盈余 +500</title></ellipse></g>
-                <g class="petal" transform="rotate(257 115 118)"><ellipse cx="115" cy="71" rx="30" ry="46" fill="#e2685a"><title>09/08 超支 -450</title></ellipse></g>
-                <g class="petal" id="petalToday" transform="rotate(308.4 115 118)"><ellipse cx="115" cy="70" rx="29" ry="46" fill="#6cc57d"><title>09/09 今天</title></ellipse></g>
-              </g>
-              <circle cx="115" cy="118" r="36" fill="#ffffff"/>
-              <text class="big" x="115" y="122" id="flowerCoverage">6/7</text>
-              <text class="mid" x="115" y="136">已记录</text>
-              <text class="lbl" x="150" y="22">盈余</text>
-              <text class="lbl" x="212" y="124">超支</text>
-              <text class="lbl" x="106" y="224">缺卡</text>
-            </svg>
           </div>
         </div>
       </div>
@@ -711,16 +738,16 @@ i.ph,i.ph-bold,i.ph-fill{line-height:1}
     </section>
 
     <aside class="col-right">
-      <div class="dash-header">
-        <h2>周账归档</h2>
-        <span class="spacer"></span>
-        <span class="sub" style="font-size:11.5px;font-weight:600;color:rgba(255,255,255,.72)">30 天前流水</span>
-      </div>
-
-      <div class="metrics">
-        <div class="arch-row"><span class="lk">08-10 ~ 08-16</span><span class="ld">覆盖 1/7 天</span><span class="num pos">+650</span><span class="num kg">~瘦 0.08 kg</span></div>
-        <div class="arch-row"><span class="lk">08-03 ~ 08-09</span><span class="ld">覆盖 2/7 天</span><span class="num pos">+1,700</span><span class="num kg">~瘦 0.22 kg</span></div>
-        <div class="arch-row"><span class="lk">07-27 ~ 08-02</span><span class="ld">覆盖 1/7 天</span><span class="num pos">+1,550</span><span class="num kg">~瘦 0.20 kg</span></div>
+      <div class="sum-card">
+        <div class="sum-head">
+          <h2>周账归档</h2>
+          <span class="sub">30 天前流水</span>
+        </div>
+        <div class="sum-body">
+          <div class="arch-row"><span class="lk">08-10 ~ 08-16</span><span class="ld">覆盖 1/7 天</span><span class="num pos">+650</span><span class="num kg">~瘦 0.08 kg</span></div>
+          <div class="arch-row"><span class="lk">08-03 ~ 08-09</span><span class="ld">覆盖 2/7 天</span><span class="num pos">+1,700</span><span class="num kg">~瘦 0.22 kg</span></div>
+          <div class="arch-row"><span class="lk">07-27 ~ 08-02</span><span class="ld">覆盖 1/7 天</span><span class="num pos">+1,550</span><span class="num kg">~瘦 0.20 kg</span></div>
+        </div>
       </div>
 
       <div class="dash-panel">
@@ -927,9 +954,7 @@ function render(){
   $('#fIn').textContent='+'+fmt(curBmr);
   $('#fOut').textContent='-'+fmt(today.ate);
   $('#fEarn').textContent='+'+fmt(today.moved);
-  $('#fBmr').textContent=fmt(curBmr);
   const lastEff=bmrHistory[bmrHistory.length-1];
-  $('#fBmrNote').textContent='kcal / 天，'+lastEff.eff.slice(5)+' 起生效';
 
   /* 进度：已用 = (吃了-动了)/BMR */
   const pct=Math.max(0,Math.round((today.ate-today.moved)/curBmr*100));
@@ -943,8 +968,7 @@ function render(){
   /* 近 7 天：滚动盈余 + 今日卡 */
   $('#weekSurplus').textContent=sign(roll.sum);
   const td=$('#todayCard');
-  $('#tdAte').textContent=fmt(today.ate);
-  $('#tdMove').textContent=fmt(today.moved);
+  $('#tdIo').textContent='吃 '+fmt(today.ate)+' · 动 '+fmt(today.moved);
   $('#tdBal').textContent=sign(bal);
   td.classList.toggle('sage',bal>=0);
   td.classList.toggle('brick',bal<0);
@@ -998,6 +1022,7 @@ function ledgerRowHTML(d){
       <span class="c-num ${rec?'':'dim'}">${rec?fmt(rec.moved):'--'}</span>
       <span class="c-num bal ${s===null?'dim':s>=0?'pos':'neg'}">${s===null?'--':sign(s)}</span>
       <span class="c-state"><span class="status-pill ${cls}">${state}</span></span>
+      <span class="c-chev"><i class="ph-bold ph-caret-down"></i></span>
     </div>
     <div class="row-edit"><div><div class="row-edit-inner">
       <div class="field"><label>吃了</label><div class="box"><input class="e-ate" inputmode="numeric" value="${rec?fmt(rec.ate):''}" placeholder="0"><span class="unit">kcal</span></div></div>
@@ -1011,9 +1036,11 @@ function ledgerRowHTML(d){
 }
 function renderLedger(){
   const box=$('#ledgerTable');
-  box.innerHTML='<div class="call-headrow" aria-hidden="true"><span>日期</span><span style="text-align:right">吃了</span><span style="text-align:right">动了</span><span style="text-align:right">当日余额</span><span style="text-align:right">状态</span></div>'
-    + LEDGER_DATES.map(ledgerRowHTML).join('');
+  box.innerHTML='<div class="call-headrow" aria-hidden="true"><span>日期</span><span style="text-align:right">吃了</span><span style="text-align:right">动了</span><span style="text-align:right">当日余额</span><span style="text-align:right">状态</span><span></span></div>'
+    + LEDGER_DATES.map(ledgerRowHTML).join('')
+    + '<div class="table-empty" id="ledgerEmpty" hidden>没有匹配的流水</div>';
   $$('#ledgerTable .ledger-item').forEach(bindLedgerItem);
+  filterLedger($('#searchInput').value);
 }
 function parseNum(v){const n=Number(String(v).replace(/[,，\s]/g,''));return Number.isFinite(n)&&n>=0?n:null}
 
@@ -1043,6 +1070,17 @@ function bindLedgerItem(item){
 renderLedger();
 
 /* ================= 今日页：记一笔（R4/R6，回车即存） ================= */
+/* ---- 峰终定律：保存=峰值时刻。数字滚动 + 按钮确认反馈 ---- */
+const SAVE_HTML='<i class="ph ph-plus"></i>保存<span class="kbd">↵</span>';
+function animateNum(el,from,to){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches||from===to)return;
+  const dur=420,t0=performance.now();
+  (function frame(t){
+    const p=Math.min((t-t0)/dur,1),e=1-Math.pow(1-p,3);
+    el.textContent=sign(Math.round(from+(to-from)*e));
+    if(p<1)requestAnimationFrame(frame);
+  })(t0);
+}
 let armed=false;
 function saveToday(){
   const ate=parseNum($('#ateInput').value), moved=parseNum($('#moveInput').value);
@@ -1053,9 +1091,18 @@ function saveToday(){
     return;
   }
   if((ate>10000||moved>10000)&&!armed){armed=true;warn.hidden=false;$('#saveBtn').classList.add('arm');return}
+  const fromBal=surplus(TODAY), fromRoll=rolling().sum;
   days[TODAY]={ate,moved,note:days[TODAY].note||''};
   armed=false;warn.hidden=true;$('#saveBtn').classList.remove('arm');
   render();renderLedger();
+  animateNum($('#bigBal'),fromBal,surplus(TODAY));
+  animateNum($('#stSurplus'),fromRoll,rolling().sum);
+  const btn=$('#saveBtn');
+  if(!btn.dataset.lock){
+    btn.dataset.lock='1';
+    btn.innerHTML='<i class="ph-fill ph-check"></i>已记入';
+    setTimeout(()=>{btn.innerHTML=SAVE_HTML;delete btn.dataset.lock},1200);
+  }
 }
 $('#saveBtn').addEventListener('click',saveToday);
 [$('#ateInput'),$('#moveInput')].forEach(i=>{
@@ -1135,7 +1182,7 @@ $('#editBtn').addEventListener('click',focusEntry);
 $('#ledgerAdd').addEventListener('click',focusEntry);
 $('#goBill').addEventListener('click',()=>{
   goto('ledger');
-  setTimeout(()=>$('.dash-header').scrollIntoView({behavior:'smooth',block:'center'}),80);
+  setTimeout(()=>$('.sum-card').scrollIntoView({behavior:'smooth',block:'center'}),80);
 });
 const bell=$('#bell');
 bell.addEventListener('click',()=>{
@@ -1143,6 +1190,51 @@ bell.addEventListener('click',()=>{
   bell.title='没有新提醒';
 });
 $('#backBtn').addEventListener('click',()=>{if(history.length>1)history.back()});
+
+/* ---- 雅各布定律：搜索展开为常规搜索框，过滤账本流水 ---- */
+const searchBar=$('#searchBar'),searchInput=$('#searchInput');
+let searchOpen=false;
+function toggleSearch(open){
+  searchOpen=open;
+  searchBar.hidden=!open;
+  if(open){
+    if($('.view.active').dataset.view!=='ledger')goto('ledger');
+    setTimeout(()=>searchInput.focus(),60);
+  }else{
+    searchInput.value='';
+    filterLedger('');
+  }
+}
+function filterLedger(q){
+  q=(q??'').trim().toLowerCase();
+  let shown=0;
+  $$('#ledgerTable .ledger-item').forEach(item=>{
+    const d=item.dataset.date,rec=days[d];
+    const hay=(d+' '+WEEKDAYS[d]+' '+(rec?(rec.note||'')+' '+fmt(rec.ate)+' '+fmt(rec.moved):'缺卡 补记')).toLowerCase();
+    const show=!q||hay.includes(q);
+    item.classList.toggle('hide',!show);
+    if(show)shown++;
+  });
+  const empty=$('#ledgerEmpty');
+  if(empty)empty.hidden=shown>0;
+}
+$('#searchBtn').addEventListener('click',()=>toggleSearch(!searchOpen));
+$('#searchClose').addEventListener('click',()=>toggleSearch(false));
+searchInput.addEventListener('input',()=>filterLedger(searchInput.value));
+searchInput.addEventListener('keydown',e=>{if(e.key==='Escape')toggleSearch(false)});
+
+/* ---- 费茨定律：日卡=大目标，点击直达账本对应行改账 ---- */
+$$('.day-card').forEach(c=>c.addEventListener('click',()=>{
+  const d=c.dataset.day;
+  goto('ledger');
+  setTimeout(()=>{
+    const item=document.querySelector('[data-date="'+d+'"]');
+    if(!item)return;
+    item.classList.add('open');
+    item.querySelector('.ledger-row').setAttribute('aria-expanded','true');
+    item.scrollIntoView({behavior:'smooth',block:'center'});
+  },150);
+}));
 
 render();
 </script>
